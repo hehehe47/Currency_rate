@@ -160,13 +160,7 @@ class Currency(object):
     def add_header(self):
         # TODO
         a = 1
-        a1 = 1
-        a2= 1
-        a3 = 1
-        a4 = 1
-        a5 = 1
-        a6 = 1
-        a7 = 1
+
 
     def get_usd(self):
         if self.header:
