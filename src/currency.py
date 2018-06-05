@@ -3,7 +3,9 @@ import requests
 import bs4
 import json
 import re
+from influxdb import InfluxDBClient
 
+CLIENT = InfluxDBClient(database='cr')
 
 HEADERS = {
     '浦发银行': {
@@ -143,6 +145,7 @@ DOB = [
      'reg': 'td[class="rateTbl2Row1"]', 'index': '14', 'header': False}  # 恒生银行
 ]
 
+
 class Currency(object):
     def __init__(self, name, type, url, reg, index, header):
         self.name = name
@@ -152,22 +155,21 @@ class Currency(object):
         self.index = index
         self.header = header
 
-    def need_post(self):
-        # TODO
-        a = 1
-
-    def add_header(self):
-        # TODO
-        a = 1
-
-
     def get_usd(self):
-        if self.header:
-            r = requests.post(self.url, data=HEADERS[self.name]['data'], headers=HEADERS[self.name]['header'])
-        else:
-            r = requests.get(self.url)  # 获取页面信息
+        try:
+            if self.header:
+                r = requests.post(self.url, data=HEADERS[self.name]['data'], headers=HEADERS[self.name]['header'])
+            else:
+                r = requests.get(self.url)  # 获取页面信息
+        except Exception as e:
+            print(e)
+            return 0
         if self.type == 'j':  # 若返回类型为json
-            r = r.json()  # 先转换成json格式
+            try:
+                r = r.json()  # 先转换成json格式
+            except Exception as e:
+                print('Error when converting json:')
+                print(e)
             r_l = []
             if self.reg != '':
                 r_l = self.reg.split('/')  # reg按/分隔
@@ -183,6 +185,15 @@ class Currency(object):
                             c = c.get(self.index.split('/')[1]).rstrip('0')
                         if float(c) < 600:
                             c = str(float(c) * 100)
+                        try:
+                            CLIENT.write_points([{
+                                'measurement': 'dollar',
+                                'tags': {'bname': self.name},
+                                'fields': {'rate': c}
+                            }])
+                        except Exception as e:
+                            print('Influx writes Error:')
+                            print(e)
                         print(self.name + ':' + c)  # 去除尾部0
                         break
             except Exception as e:
@@ -196,6 +207,15 @@ class Currency(object):
                     .strip('0')
                 if float(c) < 600:
                     c = str(float(c) * 100)
+                try:
+                    CLIENT.write_points([{
+                        'measurement': 'dollar',
+                        'tags': {'bname': self.name},
+                        'fields': {'rate': c}
+                    }])
+                except Exception as e:
+                    print('Influx writes Error:')
+                    print(e)
                 print(self.name + ':' + c)
             except Exception as e:
                 print(self.name + ' error: ')
@@ -206,6 +226,15 @@ class Currency(object):
                 c = re.findall(self.reg, r.text)[int(self.index)]
                 if float(c) < 600:
                     c = str(float(c) * 100)
+                try:
+                    CLIENT.write_points([{
+                        'measurement': 'dollar',
+                        'tags': {'bname': self.name},
+                        'fields': {'rate': c}
+                    }])
+                except Exception as e:
+                    print('Influx writes Error:')
+                    print(e)
                 print(self.name + ':' + c)
             except Exception as e:
                 print(self.name + ' error: ')
@@ -217,7 +246,9 @@ def sort_currency(list_of_currency):
     return list_of_currency
 
 
-for i in DOB:
-    if i['type'] != '':  # and i==DOB[15]:
-        c = Currency(i['name'], i['type'], i['url'], i['reg'], i['index'], i['header'])
-        c.get_usd()
+while True:
+    for i in DOB:
+        if i['type'] != '':  # and i==DOB[15]:
+            c = Currency(i['name'], i['type'], i['url'], i['reg'], i['index'], i['header'])
+            c.get_usd()
+    time.sleep(5 * 60)
