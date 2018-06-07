@@ -40,6 +40,8 @@ HEADERS = {
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
             'Cookie': 'JSESSIONID=JIbUKarK8UfDwmyRYsMY4I35Y_3w39E30fD3IVKMK5RDMw1tQ6k_!-1924768203;'
+            # =FO7YBYxJkKLZSZnskd7HtzCw7UlWjmNpg_RG3PM33k21Ng_LFhPY!228478839!'
+            # + str(time.time()).replace('.', '')[:13] + ';'
                       'fp_ver=4.4.1; Hm_lvt_9311ae0af3818e9231e72458be9cdbce=1528081712,1528081860,1528082062;'
                       'BSFIT_EXPIRATION=1530749880033; BSFIT_OkLJUJ=FEGpc1NH9Z_nb3LNhoDsbzPYkZ5Uh1rf;'
                       'BSFIT_DEVICEID=zcckRoCa__HYnCeWB9ooHqSdMU1AkUoIEw2wlEdpCcRyWf_kLR_qUEzD0C11dVYuRmTGsTqPn5hu17plNx'
@@ -170,6 +172,29 @@ LOG_DIR = '..\\log'
 
 LOG_FILE = '..\\log\\currency_rate.xlsx'
 
+def get_col():
+    '''
+    本来应该用26进制做短除生成列，但由于用26进制无法表示AA（[0,0]）
+    故使用27进制，将0置为 chr(54):@ 然后将所有带@的排除生成全部列
+    :return: dic{1:A,2:B,3:C..}
+    '''
+    d,ind = {},0
+    for i in range(0,16384): # xlsx 最大列数
+        l = []
+        while i != 0:
+            a = i % 27  # i短除余数
+            i = int(i/27)  # 用商更新自身
+            l.append(a)  # 商集
+        l.reverse()
+        col = ''.join([chr(64+j) for j in l]) # 54是@ 防止A为0时丢失 e.g.[1,1]应该是AA不是BB
+        if col and '@' not in col:
+            d[ind] = col
+            ind+=1
+    return d
+
+
+COL_SET = get_col()
+# print(COL_SET)
 
 class Currency(object):
     def __init__(self, name, rt_type, url, reg, index, header):
@@ -276,14 +301,15 @@ class Currency(object):
 
 
 def init():
-    if not os.path.exists(LOG_DIR):
+    if not os.path.exists(LOG_DIR):  # 构建log目录
         os.mkdir(LOG_DIR)
-    if not os.path.exists(LOG_FILE):
+    if not os.path.exists(LOG_FILE):  # 新建xlsx
         workbook = xlsxwriter.Workbook(LOG_FILE)  # 仅应用于新建，若存在无法进行操作
         worksheet = workbook.add_worksheet('cr')
         for index, bank in enumerate(DOB):
             worksheet.write(index + 1, 0, bank['name'])  # row col content
         workbook.close()
+
 
 
 def sort_currency(list_of_currency):
@@ -297,13 +323,13 @@ while True:
     l = []  # l 银行:汇率
     for i in DOB:
         rate = None
-        if i['rt_type'] != '':  # and i==DOB[15]:
+        if i['rt_type'] != '' :#and i == DOB[8]:  # 兴业 8
             c = Currency(i['name'], i['rt_type'], i['url'], i['reg'], i['index'], i['header'])
             rate = c.get_usd()
         l.append(
             {'name': i['name'], 'rate': (rate if rate else '??')})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][if rate]}
     print(l)
-    write_in(l, LOG_FILE)
+    write_in(l, LOG_FILE,COL_SET)
     print('------end-------')
     exit(0)  # 记得关闭退出
-    time.sleep(5 * 60)
+    time.sleep(10 * 60)

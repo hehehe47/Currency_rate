@@ -1,15 +1,16 @@
-# from influxdb import InfluxDBClient
+from influxdb import InfluxDBClient
 import time
+
 # from src.currency import Currency
 
-# client = InfluxDBClient(database='cr')
+client = InfluxDBClient(database='cr')
 # client.write_points([{
 #     'measurement':'dollar',
 #     'tags':{'name':'abc'},
 #     'fields':{'rate':'1313.1312112'}
 # }])
 
-# a = client.query("select rate from dollar ;")  # WHERE bname ='工商银行'
+# a = client.query("select rate from dollar WHERE bname='工商银行';")  # WHERE bname ='工商银行'
 # for i in a['dollar']:
 #     print(i['rate'])
 #     #
@@ -54,11 +55,41 @@ import bs4
 # c.get_usd()
 # import time
 # # print(time.strftime('%Y-%M-%D %H:%m:%s',time.localtime(1528097970)))
-# print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(1924768203)))
-# print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(1528272892.100)))
+print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
+print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(1528337632.329)))
 LOG_FILE = '..\\log\\currency_rate.xlsx'
 
-import openpyxl
-w = openpyxl.load_workbook(LOG_FILE)
-s = w.get_active_sheet()
-print(s.max_column)
+# print(ord('A'))
+# print(chr(97))
+
+# while i<=26*26:
+#     s = ''
+#     num1 = int(i/26)
+#     num2 = i%26
+#     print(chr(64+num1)*[0,1][num1!=0]+chr(64+num2))
+#     i+=1
+# import openpyxl
+# d = []
+# for i in range(0, 26 * 26 * 27 - 1):
+#     l = []
+#     while i != 0:
+#         l.append(i % 27)
+#         i = int(i / 27)
+#     l.reverse()
+#     a = ''.join([chr(64 + i) for i in l])
+#     if '@' not in a and a:
+#         d.append(a)
+#     i += 1
+# #
+# # for i, j in enumerate(d):
+# #     print(i, j)
+#
+# workbook = openpyxl.Workbook('1.xlsx')
+# sheet = workbook.get_sheet_names()
+# print(sheet)
+# for i in sheet:
+#     print(i)
+# for i, j in enumerate(d):
+#     sheet[j+'1'] = j+'asdf'
+#     break
+# workbook.save('1.xlsx')
