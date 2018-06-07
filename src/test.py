@@ -1,18 +1,18 @@
-# from influxdb import InfluxDBClient
+from influxdb import InfluxDBClient
 # import time
 
 # from src.currency import Currency
 
-# client = InfluxDBClient(database='cr')
+client = InfluxDBClient(database='cr')
 # client.write_points([{
 #     'measurement':'dollar',
 #     'tags':{'name':'abc'},
 #     'fields':{'rate':'1313.1312112'}
 # }])
 
-# a = client.query("select rate from dollar WHERE bname='工商银行';")  # WHERE bname ='工商银行'
-# for i in a['dollar']:
-#     print(i['rate'])
+a = client.query("select rate from dollar WHERE bname='工商银行';")  # WHERE bname ='工商银行'
+for i in a['dollar']:
+    print(i['rate'])
 #     #
 #     # for j in i:
 #     #     print(j['bname'],j['rate'])
