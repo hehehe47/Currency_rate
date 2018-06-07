@@ -172,28 +172,31 @@ LOG_DIR = '..\\log'
 
 LOG_FILE = '..\\log\\currency_rate.xlsx'
 
+
 def get_col():
     '''
     本来应该用26进制做短除生成列，但由于用26进制无法表示AA（[0,0]）
     故使用27进制，将0置为 chr(54):@ 然后将所有带@的排除生成全部列
     :return: dic{1:A,2:B,3:C..}
     '''
-    d,ind = {},0
-    for i in range(0,16384): # xlsx 最大列数
+    d, ind = {}, 0
+    for i in range(0, 16384):  # xlsx 最大列数
         l = []
         while i != 0:
             a = i % 27  # i短除余数
-            i = int(i/27)  # 用商更新自身
+            i = int(i / 27)  # 用商更新自身
             l.append(a)  # 商集
         l.reverse()
-        col = ''.join([chr(64+j) for j in l]) # 54是@ 防止A为0时丢失 e.g.[1,1]应该是AA不是BB
+        col = ''.join([chr(64 + j) for j in l])  # 54是@ 防止A为0时丢失 e.g.[1,1]应该是AA不是BB
         if col and '@' not in col:
             d[ind] = col
-            ind+=1
+            ind += 1
     return d
 
 
 COL_SET = get_col()
+
+
 # print(COL_SET)
 
 class Currency(object):
@@ -208,6 +211,11 @@ class Currency(object):
     def get_usd(self):
         try:
             if self.header:
+                if self.name == '兴业银行':
+                    r_tmp = requests.get('https://personalbank.cib.com.cn/pers/main/pubinfo/ifxQuotationQuery.do')
+                    jsessonid = r_tmp.headers['Set-Cookie'].split(',')[1].strip(' ').split(';')[0]
+                    HEADERS[self.name]['header']['Cookie'] = HEADERS[self.name]['header']['Cookie'].replace(
+                        'JSESSIONID=JIbUKarK8UfDwmyRYsMY4I35Y_3w39E30fD3IVKMK5RDMw1tQ6k_!-1924768203;', jsessonid)
                 r = requests.post(self.url, data=HEADERS[self.name]['data'], headers=HEADERS[self.name]['header'])
             else:
                 r = requests.get(self.url)  # 获取页面信息
@@ -311,7 +319,6 @@ def init():
         workbook.close()
 
 
-
 def sort_currency(list_of_currency):
     # TODO sort the currency
     return list_of_currency
@@ -323,13 +330,13 @@ while True:
     l = []  # l 银行:汇率
     for i in DOB:
         rate = None
-        if i['rt_type'] != '' :#and i == DOB[8]:  # 兴业 8
+        if i['rt_type'] != '':  # and i == DOB[8]:  # 兴业 8
             c = Currency(i['name'], i['rt_type'], i['url'], i['reg'], i['index'], i['header'])
             rate = c.get_usd()
         l.append(
             {'name': i['name'], 'rate': (rate if rate else '??')})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][if rate]}
-    print(l)
-    write_in(l, LOG_FILE,COL_SET)
+    # print(l)
+    write_in(l, LOG_FILE, COL_SET)
     print('------end-------')
-    exit(0)  # 记得关闭退出
+    # exit(0)  # 记得关闭退出
     time.sleep(10 * 60)
