@@ -165,7 +165,13 @@ DOB = [
      'reg': 'td', 'index': '16', 'header': False},  # 汇丰银行 25
     {'name': '恒生银行', 'rt_type': 'h',
      'url': 'http://www.hangseng.com.cn/1/2/market-information-chi/deposit-exchange-rates',
-     'reg': 'td[class="rateTbl2Row1"]', 'index': '14', 'header': False}  # 恒生银行 26
+     'reg': 'td[class="rateTbl2Row1"]', 'index': '14', 'header': False},  # 恒生银行 26
+    {'name': '大华银行', 'rt_type': 'h',
+     'url': 'https://uniservices1.uobgroup.com/secure/cn/online_rates/foreign_exchange_rates_against_chinese_renminbi.jsp',
+     'reg': 'td', 'index': '65', 'header': False},  # 大华银行 27
+    {'name': '盛京银行', 'rt_type': 'h',
+     'url': 'http://www.shengjingbank.com.cn/gjyw/flbz/whzjywsfb/wbpjb/index.shtml',
+     'reg': 'td', 'index': '3', 'header': False}  # 盛京银行 28
 ]
 
 LOG_DIR = '..\\log'
@@ -249,6 +255,9 @@ class Currency(object):
                             c = c.get(self.index.split('/')[1]).rstrip('0')
                         if float(c) < 600:
                             c = str(float(c) * 100)
+                        c = "%.4f" % (float(c))
+                        if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
+                            return 'Got Wrong!'
                         try:
                             CLIENT.write_points([{
                                 'measurement': 'dollar',
@@ -259,8 +268,6 @@ class Currency(object):
                             print('Influx writes Error:')
                             print(e)
                             return None
-                        if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
-                            c = 'Got Wrong'
                         # print(self.name + ':' + c)  # 去除尾部0
                         return c
             except Exception as e:
@@ -275,6 +282,9 @@ class Currency(object):
                     .strip('0')
                 if float(c) < 600:
                     c = str(float(c) * 100)
+                c = "%.4f" % (float(c))
+                if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
+                    return 'Got Wrong!'
                 try:
                     CLIENT.write_points([{
                         'measurement': 'dollar',
@@ -285,8 +295,6 @@ class Currency(object):
                     print('Influx writes Error:')
                     print(e)
                     return None
-                if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
-                    c = 'Got Wrong'
                 # print(self.name + ':' + c)
                 return c
             except Exception as e:
@@ -299,6 +307,9 @@ class Currency(object):
                 c = re.findall(self.reg, r.text)[int(self.index)]
                 if float(c) < 600:
                     c = str(float(c) * 100)
+                c = "%.4f" % (float(c))
+                if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
+                    return 'Got Wrong!'
                 try:
                     CLIENT.write_points([{
                         'measurement': 'dollar',
@@ -309,8 +320,7 @@ class Currency(object):
                     print('Influx writes Error:')
                     print(e)
                     return None
-                if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
-                    c = 'Got Wrong'
+
                 # print(self.name + ':' + c)
                 return c
             except Exception as e:
@@ -343,29 +353,34 @@ init()
 
 while True:
     l = []  # l 银行:汇率
+    fl = []  # file 用
     print(str(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
     for i in DOB:
         rate = None
         if i['rt_type'] != '':  # and i == DOB[8]:  # 兴业 8
             c = Currency(i['name'], i['rt_type'], i['url'], i['reg'], i['index'], i['header'])
             rate = c.get_usd()
-        l.append(
+        if '.' in rate:  # 如果是数字再存l
+            l.append(
+                {'name': i['name'],
+                 'rate': rate})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0 3\(rate if rate else '??')
+        fl.append(  # 完整带Got Wrong的日志
             {'name': i['name'],
-             'rate': (rate if rate else '??')})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0
+             'rate': rate})
     # print(l)
     #####
-    write_in(l, LOG_FILE, COL_SET)
+    write_in(fl, LOG_FILE, COL_SET)
     #####写文件务必在排序之前#####
     sort_currency(l)  # 排个序
     count = 1
     for g in l:  # 格式化输出 5个一行
-        if 'Got Wrong' != g['rate'] and '??' != g['rate']:  # 若超出范围 或不存在 不输出
-            print(g['name'] + " : %.4f" % (float(g['rate'])), end='    ')
-            if count % 5 == 0:
-                print(' ')
-            count += 1
+        # if 'Got Wrong' != g['rate']:  # 若超出范围 或不存在 不输出 # and '??' != g['rate']
+        print(g['name'] + " : %.4f" % (float(g['rate'])), end='    ')
+        if count % 5 == 0:
+            print(' ')
+        count += 1
     print(' ')
-    print(['Get all', 'Sth missing']['??' in [k['rate'] for k in l]])  # True为1 False为0
+    print(['Get all', 'Sth missing']['Got Wrong!' in [k['rate'] for k in l]])  # True为1 False为0
     # Same as print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
     print('------end-------')
     # exit(0)  # 记得关闭退出

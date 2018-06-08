@@ -10,9 +10,9 @@ from influxdb import InfluxDBClient
 #     'fields':{'rate':'1313.1312112'}
 # }])
 #
-# a = client.query("select rate from dollar WHERE bname='工商银行';")  # WHERE bname ='工商银行'
+# a = client.query("select time,rate from dollar WHERE rate='862.96';")  # WHERE bname ='工商银行'
 # for i in a['dollar']:
-#     print(i['rate'])
+#     print(i)
 #     #
 #     # for j in i:
 #     #     print(j['bname'],j['rate'])
@@ -33,7 +33,7 @@ import bs4
 # 'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8',
 # 'Cookie':'Hm_lvt_8b9480950a6cadd80a66f238d3e4542e=1528097970,1528097991'
 # }
-# r = requests.get('http://www.hangseng.com.cn/1/2/market-information-chi/deposit-exchange-rates')
+# r = requests.get('http://www.shengjingbank.com.cn/gjyw/flbz/whzjywsfb/wbpjb/index.shtml')
 # r = requests.post(DOB[8]['url'], headers=HEADERS['兴业银行']['header'], data=HEADERS['兴业银行']['data'])
 # s = r.headers['Set-Cookie'].split(',')[1].strip(' ').split(';')[0]
 # a = {
@@ -53,7 +53,7 @@ import bs4
 # ind = b.select('td[class="rateTbl2Row1"]')
 # print(ind[14])
 # for i,j in enumerate(b.select('td')):
-# print(i,j)
+#     print(i,j)
 # print(b)
 # print(a)
 #
@@ -119,6 +119,9 @@ import bs4
 #
 # print(type(np.linspace(-np.pi, np.pi, 100)))
 # print(type(np.cos(np.linspace(-np.pi, np.pi, 100))))
-l = [1,2,3,4,5]
-for i in range(len(l)):
-    print(l[i])
+# l = [1,2,3,4,5]
+# for i in range(len(l)):
+#     print(l[i])
+
+c = '100.1'
+print(c.isdecimal())
