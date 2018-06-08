@@ -353,6 +353,9 @@ while True:
             {'name': i['name'],
              'rate': (rate if rate else '??')})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0
     # print(l)
+    #####
+    write_in(l, LOG_FILE, COL_SET)
+    #####写文件务必在排序之前#####
     sort_currency(l)  # 排个序
     count = 1
     for g in l:  # 格式化输出 5个一行
@@ -364,7 +367,6 @@ while True:
     print(' ')
     print(['Get all', 'Sth missing']['??' in [k['rate'] for k in l]])  # True为1 False为0
     # Same as print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
-    write_in(l, LOG_FILE, COL_SET)
     print('------end-------')
     # exit(0)  # 记得关闭退出
     time.sleep(10 * 60)
