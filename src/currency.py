@@ -330,12 +330,13 @@ def init():
         workbook.close()
 
 
+# 对整个字典列表进行排序
 def sort_currency(list_of_currency):
-    m = list_of_currency[0]
-    for c in list_of_currency:
-        if float(c['rate']) < float(m['rate']):
-            m = c
-    return m
+    for i in range(len(list_of_currency) - 1):
+        for j in range(len(list_of_currency) - 1 - i):
+            if float(list_of_currency[j]['rate']) > float(list_of_currency[j + 1]['rate']):
+                list_of_currency[j], list_of_currency[j + 1] = list_of_currency[j + 1], list_of_currency[j]
+    return list_of_currency
 
 
 init()
@@ -352,6 +353,7 @@ while True:
             {'name': i['name'],
              'rate': (rate if rate else '??')})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0
     # print(l)
+    sort_currency(l)  # 排个序
     count = 1
     for g in l:  # 格式化输出 5个一行
         if 'Got Wrong' != g['rate'] and '??' != g['rate']:  # 若超出范围 或不存在 不输出
@@ -360,8 +362,6 @@ while True:
                 print(' ')
             count += 1
     print(' ')
-    m = sort_currency(l)
-    print('MIN IN THIS TURN: NAME: ' + m['name'] + ' RATE: ' + m['rate'])
     print(['Get all', 'Sth missing']['??' in [k['rate'] for k in l]])  # True为1 False为0
     # Same as print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
     write_in(l, LOG_FILE, COL_SET)

@@ -115,7 +115,10 @@ import bs4
 # s = '643'
 # name = 'a'
 # print(name+":%.2f" %(float(s)))
-import numpy as np
-
-print(type(np.linspace(-np.pi, np.pi, 100)))
-print(type(np.cos(np.linspace(-np.pi, np.pi, 100))))
+# import numpy as np
+#
+# print(type(np.linspace(-np.pi, np.pi, 100)))
+# print(type(np.cos(np.linspace(-np.pi, np.pi, 100))))
+l = [1,2,3,4,5]
+for i in range(len(l)):
+    print(l[i])
