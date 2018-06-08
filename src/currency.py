@@ -331,8 +331,11 @@ def init():
 
 
 def sort_currency(list_of_currency):
-    # TODO sort the currency
-    return list_of_currency
+    m = list_of_currency[0]
+    for c in list_of_currency:
+        if float(c['rate']) < float(m['rate']):
+            m = c
+    return m
 
 
 init()
@@ -352,11 +355,13 @@ while True:
     count = 1
     for g in l:  # 格式化输出 5个一行
         if 'Got Wrong' != g['rate'] and '??' != g['rate']:  # 若超出范围 或不存在 不输出
-            print(g['name'] + " : %.2f" % (float(g['rate'])), end='    ')
+            print(g['name'] + " : %.4f" % (float(g['rate'])), end='    ')
             if count % 5 == 0:
                 print(' ')
             count += 1
     print(' ')
+    m = sort_currency(l)
+    print('MIN IN THIS TURN: NAME: ' + m['name'] + ' RATE: ' + m['rate'])
     print(['Get all', 'Sth missing']['??' in [k['rate'] for k in l]])  # True为1 False为0
     # Same as print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
     write_in(l, LOG_FILE, COL_SET)
