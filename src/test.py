@@ -3,16 +3,16 @@ from influxdb import InfluxDBClient
 
 # from src.currency import Currency
 
-client = InfluxDBClient(database='cr')
+# client = InfluxDBClient(database='cr')
 # client.write_points([{
 #     'measurement':'dollar',
 #     'tags':{'name':'abc'},
 #     'fields':{'rate':'1313.1312112'}
 # }])
-
-a = client.query("select rate from dollar WHERE bname='工商银行';")  # WHERE bname ='工商银行'
-for i in a['dollar']:
-    print(i['rate'])
+#
+# a = client.query("select rate from dollar WHERE bname='工商银行';")  # WHERE bname ='工商银行'
+# for i in a['dollar']:
+#     print(i['rate'])
 #     #
 #     # for j in i:
 #     #     print(j['bname'],j['rate'])
@@ -33,7 +33,7 @@ import bs4
 # 'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8',
 # 'Cookie':'Hm_lvt_8b9480950a6cadd80a66f238d3e4542e=1528097970,1528097991'
 # }
-r = requests.get('http://www.hangseng.com.cn/1/2/market-information-chi/deposit-exchange-rates')
+# r = requests.get('http://www.hangseng.com.cn/1/2/market-information-chi/deposit-exchange-rates')
 # r = requests.post(DOB[8]['url'], headers=HEADERS['兴业银行']['header'], data=HEADERS['兴业银行']['data'])
 # s = r.headers['Set-Cookie'].split(',')[1].strip(' ').split(';')[0]
 # a = {
@@ -48,10 +48,10 @@ r = requests.get('http://www.hangseng.com.cn/1/2/market-information-chi/deposit-
 # }
 # print(a['Cookie'].replace('JSESSIONID=JIbUKarK8UfDwmyRYsMY4I35Y_3w39E30fD3IVKMK5RDMw1tQ6k_!-1924768203;',s))
 # print()
-b = bs4.BeautifulSoup(r.text,'html.parser')
+# b = bs4.BeautifulSoup(r.text,'html.parser')
 # print()
-ind = b.select('td[class="rateTbl2Row1"]')
-print(ind[14])
+# ind = b.select('td[class="rateTbl2Row1"]')
+# print(ind[14])
 # for i,j in enumerate(b.select('td')):
 # print(i,j)
 # print(b)
@@ -106,3 +106,12 @@ print(ind[14])
 #     sheet[j+'1'] = j+'asdf'
 #     break
 # workbook.save('1.xlsx')
+
+# l = [{'name': 'gg', 'rate': '1'}, {'name': 'aa', 'rate': '2'}, {'name': 'bb', 'rate': '3'},
+#      {'name': 'cc', 'rate': 'a'}]
+# print([k['rate'] for k in l])
+# print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
+# print(['Get all', 'Sth missing']['??' in [k['rate'] for k in l]])
+s = '643'
+name = 'a'
+print(name+":%.2f" %(float(s)))

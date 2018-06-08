@@ -172,6 +172,9 @@ LOG_DIR = '..\\log'
 
 LOG_FILE = '..\\log\\currency_rate.xlsx'
 
+MAX_RATE = 650
+MIN_RATE = 630
+
 
 def get_col():
     '''
@@ -211,6 +214,8 @@ class Currency(object):
     def get_usd(self):
         try:
             if self.header:
+                # 兴业银行需要换Cookie的Jsessionid
+                # 从.do中获取 对发送请求中header进行替换
                 if self.name == '兴业银行':
                     r_tmp = requests.get('https://personalbank.cib.com.cn/pers/main/pubinfo/ifxQuotationQuery.do')
                     jsessonid = r_tmp.headers['Set-Cookie'].split(',')[1].strip(' ').split(';')[0]
@@ -254,7 +259,9 @@ class Currency(object):
                             print('Influx writes Error:')
                             print(e)
                             return None
-                        print(self.name + ':' + c)  # 去除尾部0
+                        if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
+                            c = 'Got Wrong'
+                        # print(self.name + ':' + c)  # 去除尾部0
                         return c
             except Exception as e:
                 print(self.name + ' error: ')
@@ -278,7 +285,9 @@ class Currency(object):
                     print('Influx writes Error:')
                     print(e)
                     return None
-                print(self.name + ':' + c)
+                if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
+                    c = 'Got Wrong'
+                # print(self.name + ':' + c)
                 return c
             except Exception as e:
                 print(self.name + ' error: ')
@@ -300,7 +309,9 @@ class Currency(object):
                     print('Influx writes Error:')
                     print(e)
                     return None
-                print(self.name + ':' + c)
+                if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
+                    c = 'Got Wrong'
+                # print(self.name + ':' + c)
                 return c
             except Exception as e:
                 print(self.name + ' error: ')
@@ -334,9 +345,19 @@ while True:
             c = Currency(i['name'], i['rt_type'], i['url'], i['reg'], i['index'], i['header'])
             rate = c.get_usd()
         l.append(
-            {'name': i['name'], 'rate': (rate if rate else '??')})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][if rate]}
+            {'name': i['name'],
+             'rate': (rate if rate else '??')})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0
     # print(l)
+    count = 1
+    for g in l: # 格式化输出 5个一行
+        print(g['name'] + " : %.2f" % (float(g['rate'])), end='    ')
+        if count % 5 == 0:
+            print(' ')
+        count += 1
+    print(' ')
+    print(['Get all', 'Sth missing']['??' in [k['rate'] for k in l]])  # True为1 False为0
+    # Same as print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
     write_in(l, LOG_FILE, COL_SET)
     print('------end-------')
-    # exit(0)  # 记得关闭退出
+    exit(0)  # 记得关闭退出
     time.sleep(10 * 60)
