@@ -7,5 +7,33 @@ client = InfluxDBClient(database='cr')
 # for i in LOB:
 #     # print(i)
 points = client.query("SELECT bname,rate FROM dollar;")['dollar']  # WHERE bname='"+i+"';") #全量取数据库数据
-for p in points:  # points[{time:aa,bname:bb,rate:aa},{time:aa,bname:bb,rate:aa}]
-    print(p['time'])
+p = [i for i in points]  # type(points)=generator 只能被释放一次 所以遍历写入list
+
+# print(points)
+# for p in points:  # points[{time:aa,bname:bb,rate:aa},{time:aa,bname:bb,rate:aa}]
+#     print(p)
+
+
+d = {}
+for name in LOB:  # 按名字归类 写入字典
+    # r= 'a'
+    r = [j['rate'] for j in p if j['bname'] == name]
+    # for j in points:
+    #     if j['bname'] == name:
+    #         r = j['rate']
+    d[name] = r
+    # print(name,r)
+from matplotlib import pyplot as plt
+import matplotlib
+import numpy as np
+
+# 画图
+for i, j in d.items():
+    if j:
+        print(i, j)
+        nparray_y = np.array(j[:], float)
+        nparray_x = np.arange(0, len(j[:]))
+        plt.plot(nparray_x, nparray_y, label=i)
+
+plt.legend(loc='upper left')
+plt.show()

@@ -112,6 +112,10 @@ import bs4
 # print([k['rate'] for k in l])
 # print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
 # print(['Get all', 'Sth missing']['??' in [k['rate'] for k in l]])
-s = '643'
-name = 'a'
-print(name+":%.2f" %(float(s)))
+# s = '643'
+# name = 'a'
+# print(name+":%.2f" %(float(s)))
+import numpy as np
+
+print(type(np.linspace(-np.pi, np.pi, 100)))
+print(type(np.cos(np.linspace(-np.pi, np.pi, 100))))

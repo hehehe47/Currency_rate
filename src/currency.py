@@ -339,6 +339,7 @@ init()
 
 while True:
     l = []  # l 银行:汇率
+    print(str(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
     for i in DOB:
         rate = None
         if i['rt_type'] != '':  # and i == DOB[8]:  # 兴业 8
@@ -349,15 +350,16 @@ while True:
              'rate': (rate if rate else '??')})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0
     # print(l)
     count = 1
-    for g in l: # 格式化输出 5个一行
-        print(g['name'] + " : %.2f" % (float(g['rate'])), end='    ')
-        if count % 5 == 0:
-            print(' ')
-        count += 1
+    for g in l:  # 格式化输出 5个一行
+        if 'Got Wrong' != g['rate'] and '??' != g['rate']:  # 若超出范围 或不存在 不输出
+            print(g['name'] + " : %.2f" % (float(g['rate'])), end='    ')
+            if count % 5 == 0:
+                print(' ')
+            count += 1
     print(' ')
     print(['Get all', 'Sth missing']['??' in [k['rate'] for k in l]])  # True为1 False为0
     # Same as print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
     write_in(l, LOG_FILE, COL_SET)
     print('------end-------')
-    exit(0)  # 记得关闭退出
+    # exit(0)  # 记得关闭退出
     time.sleep(10 * 60)
