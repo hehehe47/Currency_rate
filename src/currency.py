@@ -1,11 +1,12 @@
-import time
-import requests
-import bs4
-import xlsxwriter
-import openpyxl
-import re
 import os
+import re
+import time
+
+import bs4
+import requests
+import xlsxwriter
 from influxdb import InfluxDBClient
+
 from src.file_io import write_in
 
 CLIENT = InfluxDBClient(database='cr')
@@ -181,6 +182,7 @@ LOG_FILE = '..\\log\\currency_rate.xlsx'
 MAX_RATE = 650
 MIN_RATE = 630
 
+WRITE_FILE = False
 
 def get_col():
     '''
@@ -357,21 +359,30 @@ while True:
     print(str(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
     for i in DOB:
         rate = None
-        if i['rt_type'] != '':  # and i == DOB[8]:  # 兴业 8
-            c = Currency(i['name'], i['rt_type'], i['url'], i['reg'], i['index'], i['header'])
-            rate = c.get_usd()
-        if '.' in rate:  # 如果是数字再存l
-            l.append(
-                {'name': i['name'],
-                 'rate': rate})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0 3\(rate if rate else '??')
-        fl.append(  # 完整带Got Wrong的日志
-            {'name': i['name'],
-             'rate': rate})
-    # print(l)
+        try:
+            if i['rt_type'] != '':  # and i == DOB[8]:  # 兴业 8
+                c = Currency(i['name'], i['rt_type'], i['url'], i['reg'], i['index'], i['header'])
+                rate = c.get_usd()
+            if '.' in rate:  # 如果是数字再存l
+                l.append(
+                    {'name': i['name'],
+                     'rate': rate})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0 3\(rate if rate else '??')
+            if WRITE_FILE:
+                fl.append(  # 完整带Got Wrong的日志
+                    {'name': i['name'],
+                     'rate': rate})
+        except Exception as e:
+            print('Fetch error:')
+            print(e)
     #####
-    write_in(fl, LOG_FILE, COL_SET)
+    if WRITE_FILE:
+        write_in(fl, LOG_FILE, COL_SET)
     #####写文件务必在排序之前#####
-    sort_currency(l)  # 排个序
+    try:
+        sort_currency(l)  # 排个序
+    except Exception as e:
+        print('Sort error:')
+        print(e)
     count = 1
     for g in l:  # 格式化输出 5个一行
         # if 'Got Wrong' != g['rate']:  # 若超出范围 或不存在 不输出 # and '??' != g['rate']
