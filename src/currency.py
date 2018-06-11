@@ -184,6 +184,7 @@ MIN_RATE = 630
 
 WRITE_FILE = False
 
+
 def get_col():
     '''
     本来应该用26进制做短除生成列，但由于用26进制无法表示AA（[0,0]）
@@ -203,6 +204,20 @@ def get_col():
             d[ind] = col
             ind += 1
     return d
+
+
+def save_to_db(measurement, bname, c):
+    try:
+        CLIENT.write_points([{
+            'measurement': measurement,
+            'tags': {'bname': bname},
+            'fields': {'rate': c}
+        }])
+        return True
+    except Exception as e:
+        print('Influx writes Error:')
+        print(e)
+        return False
 
 
 COL_SET = get_col()
@@ -260,15 +275,8 @@ class Currency(object):
                         c = "%.4f" % (float(c))
                         if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
                             return 'Got Wrong!'
-                        try:
-                            CLIENT.write_points([{
-                                'measurement': 'dollar',
-                                'tags': {'bname': self.name},
-                                'fields': {'rate': c}
-                            }])
-                        except Exception as e:
-                            print('Influx writes Error:')
-                            print(e)
+                        f = save_to_db('dollar', self.name, c)  # 存数据库
+                        if not f:
                             return None
                         # print(self.name + ':' + c)  # 去除尾部0
                         return c
@@ -287,15 +295,8 @@ class Currency(object):
                 c = "%.4f" % (float(c))
                 if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
                     return 'Got Wrong!'
-                try:
-                    CLIENT.write_points([{
-                        'measurement': 'dollar',
-                        'tags': {'bname': self.name},
-                        'fields': {'rate': c}
-                    }])
-                except Exception as e:
-                    print('Influx writes Error:')
-                    print(e)
+                f = save_to_db('dollar', self.name, c)  # 存数据库
+                if not f:
                     return None
                 # print(self.name + ':' + c)
                 return c
@@ -312,18 +313,10 @@ class Currency(object):
                 c = "%.4f" % (float(c))
                 if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
                     return 'Got Wrong!'
-                try:
-                    CLIENT.write_points([{
-                        'measurement': 'dollar',
-                        'tags': {'bname': self.name},
-                        'fields': {'rate': c}
-                    }])
-                except Exception as e:
-                    print('Influx writes Error:')
-                    print(e)
-                    return None
-
+                f = save_to_db('dollar', self.name, c)  # 存数据库
                 # print(self.name + ':' + c)
+                if not f:
+                    return None
                 return c
             except Exception as e:
                 print(self.name + ' error: ')
