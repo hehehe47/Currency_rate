@@ -3,25 +3,22 @@ from influxdb import InfluxDBClient
 
 # from src.currency import Currency
 
-# client = InfluxDBClient(database='cr')
+client = InfluxDBClient(database='cr')
 # client.write_points([{
 #     'measurement':'dollar',
 #     'tags':{'name':'abc'},
 #     'fields':{'rate':'1313.1312112'}
 # }])
 #
-# a = client.query("select time,rate from dollar WHERE rate='862.96';")  # WHERE bname ='工商银行'
-# for i in a['dollar']:
-#     print(i)
+a = client.query("select time,rate from dollar WHERE bname='兴业银行';")  # WHERE bname ='工商银行'
+for i in a['dollar']:
+    print(i)
 #     #
 #     # for j in i:
 #     #     print(j['bname'],j['rate'])
 # print(a['dollar'])
 
 
-
-import requests
-import bs4
 
 # header = {
 # 'Host':'mybank.nbcb.com.cn',

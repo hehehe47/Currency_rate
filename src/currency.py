@@ -346,8 +346,9 @@ def sort_currency(list_of_currency):
 
 init()
 
+times = 1
+
 while True:
-    times = 1
     l = []  # l 银行:汇率
     fl = []  # file 用
     print(str(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
@@ -360,7 +361,7 @@ while True:
         print('Fetch error:')
         print(e)
 
-    if times % 10 == 0:
+    if times % 3 == 0:
         for i in DOB:
             rate = None
             try:
@@ -401,5 +402,5 @@ while True:
         # exit(0)  # 记得关闭退出
         # time.sleep(10 * 60)
         times = 0
-    time.sleep(60)
+    time.sleep(5 * 60)
     times += 1
