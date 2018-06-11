@@ -234,7 +234,7 @@ class Currency(object):
         self.index = index
         self.header = header
 
-    def get_usd(self):
+    def get_usd(self, measurement):
         try:
             if self.header:
                 # 兴业银行需要换Cookie的Jsessionid
@@ -275,7 +275,7 @@ class Currency(object):
                         c = "%.4f" % (float(c))
                         if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
                             return 'Got Wrong!'
-                        f = save_to_db('dollar', self.name, c)  # 存数据库
+                        f = save_to_db(measurement, self.name, c)  # 存数据库
                         if not f:
                             return None
                         # print(self.name + ':' + c)  # 去除尾部0
@@ -295,7 +295,7 @@ class Currency(object):
                 c = "%.4f" % (float(c))
                 if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
                     return 'Got Wrong!'
-                f = save_to_db('dollar', self.name, c)  # 存数据库
+                f = save_to_db(measurement, self.name, c)  # 存数据库
                 if not f:
                     return None
                 # print(self.name + ':' + c)
@@ -313,7 +313,7 @@ class Currency(object):
                 c = "%.4f" % (float(c))
                 if float(c) > MAX_RATE or float(c) < MIN_RATE:  # 如果不巧返回页面没按规矩来
                     return 'Got Wrong!'
-                f = save_to_db('dollar', self.name, c)  # 存数据库
+                f = save_to_db(measurement, self.name, c)  # 存数据库
                 # print(self.name + ':' + c)
                 if not f:
                     return None
@@ -347,45 +347,59 @@ def sort_currency(list_of_currency):
 init()
 
 while True:
+    times = 1
     l = []  # l 银行:汇率
     fl = []  # file 用
     print(str(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())))
-    for i in DOB:
-        rate = None
-        try:
-            if i['rt_type'] != '':  # and i == DOB[8]:  # 兴业 8
-                c = Currency(i['name'], i['rt_type'], i['url'], i['reg'], i['index'], i['header'])
-                rate = c.get_usd()
-            if '.' in rate:  # 如果是数字再存l
-                l.append(
-                    {'name': i['name'],
-                     'rate': rate})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0 3\(rate if rate else '??')
-            if WRITE_FILE:
-                fl.append(  # 完整带Got Wrong的日志
-                    {'name': i['name'],
-                     'rate': rate})
-        except Exception as e:
-            print('Fetch error:')
-            print(e)
-    #####
-    if WRITE_FILE:
-        write_in(fl, LOG_FILE, COL_SET)
-    #####写文件务必在排序之前#####
     try:
-        sort_currency(l)  # 排个序
+        item = DOB[7]
+        c = Currency(item['name'], item['rt_type'], item['url'], item['reg'], item['index'], item['header'])
+        rate = c.get_usd('prediction')
+        print(item['name'], rate)
     except Exception as e:
-        print('Sort error:')
+        print('Fetch error:')
         print(e)
-    count = 1
-    for g in l:  # 格式化输出 5个一行
-        # if 'Got Wrong' != g['rate']:  # 若超出范围 或不存在 不输出 # and '??' != g['rate']
-        print(g['name'] + " : %.4f" % (float(g['rate'])), end='    ')
-        if count % 5 == 0:
-            print(' ')
-        count += 1
-    print(' ')
-    print(['Get all', 'Sth missing']['Got Wrong!' in [k['rate'] for k in l]])  # True为1 False为0
-    # Same as print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
-    print('------end-------')
-    # exit(0)  # 记得关闭退出
-    time.sleep(10 * 60)
+
+    if times % 10 == 0:
+        for i in DOB:
+            rate = None
+            try:
+                if i['rt_type'] != '':  # and i == DOB[8]:  # 兴业 8
+                    c = Currency(i['name'], i['rt_type'], i['url'], i['reg'], i['index'], i['header'])
+                    rate = c.get_usd('dollar')
+                if '.' in rate:  # 如果是数字再存l
+                    l.append(
+                        {'name': i['name'],
+                         'rate': rate})  # 1\(a>b and [a] or [b])[0] 2\[rate,'??'][rate]} True为1 False为0 3\(rate if rate else '??')
+                if WRITE_FILE:
+                    fl.append(  # 完整带Got Wrong的日志
+                        {'name': i['name'],
+                         'rate': rate})
+            except Exception as e:
+                print('Fetch error:')
+                print(e)
+        #####
+        if WRITE_FILE:
+            write_in(fl, LOG_FILE, COL_SET)
+        #####写文件务必在排序之前#####
+        try:
+            sort_currency(l)  # 排个序
+        except Exception as e:
+            print('Sort error:')
+            print(e)
+        count = 1
+        for g in l:  # 格式化输出 5个一行
+            # if 'Got Wrong' != g['rate']:  # 若超出范围 或不存在 不输出 # and '??' != g['rate']
+            print(g['name'] + " : %.4f" % (float(g['rate'])), end='    ')
+            if count % 5 == 0:
+                print(' ')
+            count += 1
+        print(' ')
+        print(['Get all', 'Sth missing']['Got Wrong!' in [k['rate'] for k in l]])  # True为1 False为0
+        # Same as print('Get all' if '??' not in [k['rate'] for k in l] else 'Sth missing')
+        print('------end-------')
+        # exit(0)  # 记得关闭退出
+        # time.sleep(10 * 60)
+        times = 0
+    time.sleep(60)
+    times += 1
