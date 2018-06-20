@@ -241,6 +241,7 @@ class Currency(object):
                 # 从.do中获取 对发送请求中header进行替换
                 if self.name == '兴业银行':
                     r_tmp = requests.get('https://personalbank.cib.com.cn/pers/main/pubinfo/ifxQuotationQuery.do')
+                    print(r_tmp)
                     jsessonid = r_tmp.headers['Set-Cookie'].split(',')[1].strip(' ').split(';')[0]
                     HEADERS[self.name]['header']['Cookie'] = HEADERS[self.name]['header']['Cookie'].replace(
                         'JSESSIONID=JIbUKarK8UfDwmyRYsMY4I35Y_3w39E30fD3IVKMK5RDMw1tQ6k_!-1924768203;', jsessonid)
@@ -267,9 +268,9 @@ class Currency(object):
                 for c in currency_list:  # 遍历每个货币种类
                     if self.index.split('/')[0] in c.values():  # 查询的币种名称和汇率名以/分隔
                         if self.name == '兴业银行':
-                            c = c.get(self.index.split('/')[1])[4].rstrip('0')
+                            c = str(c.get(self.index.split('/')[1])[4]).rstrip('0')
                         else:
-                            c = c.get(self.index.split('/')[1]).rstrip('0')
+                            c = str(c.get(self.index.split('/')[1])).rstrip('0')
                         if float(c) < 600:
                             c = str(float(c) * 100)
                         c = "%.4f" % (float(c))
@@ -282,6 +283,7 @@ class Currency(object):
                         return c
             except Exception as e:
                 print(self.name + ' error: ')
+                print(r)
                 print(e)
                 return None
 
@@ -302,6 +304,7 @@ class Currency(object):
                 return c
             except Exception as e:
                 print(self.name + ' error: ')
+                print(r.text)
                 print(e)
                 return None
 
@@ -320,6 +323,7 @@ class Currency(object):
                 return c
             except Exception as e:
                 print(self.name + ' error: ')
+                print(r.text)
                 print(e)
                 return None
 

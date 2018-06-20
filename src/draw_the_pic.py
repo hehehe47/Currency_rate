@@ -6,7 +6,9 @@ LOB = ['工商银行', '农业银行', '中国银行', '建设银行', '邮储�
 client = InfluxDBClient(database='cr')
 # for i in LOB:
 #     # print(i)
-points = client.query("SELECT bname,rate FROM dollar;")['dollar']  # WHERE bname='"+i+"';") #全量取数据库数据
+# points = client.query("SELECT bname,rate FROM dollar ;")[
+#     'dollar']  # WHERE bname='"+i+"';") #全量取数据库数据  WHERE bname ='浦发银行'
+points = client.query("SELECT bname,rate FROM prediction WHERE bname ='浦发银行';")['prediction']  # 浦发预测曲线
 p = [i for i in points]  # type(points)=generator 只能被释放一次 所以遍历写入list
 
 # print(points)
@@ -24,7 +26,6 @@ for name in LOB:  # 按名字归类 写入字典
     d[name] = r
     # print(name,r)
 from matplotlib import pyplot as plt
-import matplotlib
 import numpy as np
 
 # 画图
