@@ -1,3 +1,8 @@
+'''
+Name:美元汇率爬取器（inspired by Melodie)
+Version:2.0
+'''
+
 import os
 import re
 import time
@@ -179,7 +184,7 @@ LOG_DIR = '..\\log'
 
 LOG_FILE = '..\\log\\currency_rate.xlsx'
 
-MAX_RATE = 650
+MAX_RATE = 670
 MIN_RATE = 630
 
 WRITE_FILE = False
