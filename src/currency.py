@@ -184,7 +184,7 @@ LOG_DIR = '..\\log'
 
 LOG_FILE = '..\\log\\currency_rate.xlsx'
 
-MAX_RATE = 670
+MAX_RATE = 800
 MIN_RATE = 630
 
 WRITE_FILE = False
